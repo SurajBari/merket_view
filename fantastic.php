@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>FantasticNews.com</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body class="bg-gray-100 dark:bg-gray-900 text-gray-800 dark:text-white transition duration-300">
+
+  <!-- Navbar -->
+  <header class="bg-white dark:bg-gray-800 shadow sticky top-0 z-50">
+    <div class="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
+      <h1 class="text-2xl font-bold">📰 FantasticNews.com</h1>
+      <div class="flex flex-wrap gap-2 items-center">
+        <input type="text" id="searchInput" placeholder="Search News..." class="px-3 py-1 rounded-md border dark:bg-gray-700 dark:border-gray-600" />
+        <button onclick="toggleDarkMode()" class="text-sm px-3 py-1 bg-blue-600 text-white rounded hover:bg-blue-700 transition">Toggle Dark Mode</button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Chart Section -->
+  <section class="max-w-7xl mx-auto p-4 mt-4">
+    <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+      <h2 class="text-xl font-semibold mb-4">📈 Today's Market Trend</h2>
+      <canvas id="marketChart" height="100"></canvas>
+    </div>
+  </section>
+
+  <!-- Filters -->
+  <section class="max-w-7xl mx-auto p-4">
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4 gap-2">
+      <h2 class="text-xl font-semibold">📰 Latest Finance News (MarketAux)</h2>
+      <div class="flex gap-2">
+        <select id="regionSelect" class="px-2 py-1 rounded border dark:bg-gray-700 dark:border-gray-600">
+          <option value="">🌍 All Regions</option>
+          <option value="us">🇺🇸 US</option>
+          <option value="in">🇮🇳 India</option>
+          <option value="gb">🇬🇧 UK</option>
+          <option value="ca">🇨🇦 Canada</option>
+        </select>
+        <select id="categorySelect" class="px-2 py-1 rounded border dark:bg-gray-700 dark:border-gray-600">
+          <option value="">📂 All Categories</option>
+          <option value="general">General</option>
+          <option value="crypto">Crypto</option>
+          <option value="forex">Forex</option>
+          <option value="etfs">ETFs</option>
+          <option value="commodities">Commodities</option>
+        </select>
+      </div>
+    </div>
+  </section>
+
+  <!-- MarketAux News -->
+  <section class="max-w-7xl mx-auto p-4 grid md:grid-cols-2 lg:grid-cols-3 gap-4" id="newsContainer">
+    <!-- News will be loaded dynamically -->
+  </section>
+
+  <!-- Finnhub News -->
+  <section class="max-w-7xl mx-auto p-4 mt-10">
+    <h2 class="text-xl font-semibold mb-4">🌐 Global Financial Headlines (Finnhub)</h2>
+    <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-4" id="finnhubNews"></div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="bg-white dark:bg-gray-800 py-6 mt-10">
+    <div class="max-w-7xl mx-auto px-4 text-center text-sm text-gray-600 dark:text-gray-300">
+      <p>&copy; 2025 FantasticNews.com | All rights reserved</p>
+      <div class="mt-4">
+        <a href="#" class="text-blue-600 hover:text-blue-800 mx-2">Privacy Policy</a>
+        <a href="#" class="text-blue-600 hover:text-blue-800 mx-2">Terms of Service</a>
+        <a href="#" class="text-blue-600 hover:text-blue-800 mx-2">About Us</a>
+      </div>
+      <div class="mt-4">
+        <a href="#" class="text-blue-600 hover:text-blue-800 mx-2">Facebook</a>
+        <a href="#" class="text-blue-600 hover:text-blue-800 mx-2">Twitter</a>
+        <a href="#" class="text-blue-600 hover:text-blue-800 mx-2">Instagram</a>
+        <a href="#" class="text-blue-600 hover:text-blue-800 mx-2">LinkedIn</a>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    const marketAuxKey = 'aUywHRZuiPp47a5QGubFSt0g8ia396MuxVfH35j3'; // Replace with your MarketAux API Key
+    const finnhubApiKey = 'cvt1hf9r01qhup0tmg5gcvt1hf9r01qhup0tmg60';   // Replace with your Finnhub API Key
+    const newsContainer = document.getElementById('newsContainer');
+    const finnhubContainer = document.getElementById('finnhubNews');
+    let allNews = [];
+
+    // Toggle Dark Mode
+    function toggleDarkMode() {
+      document.documentElement.classList.toggle('dark');
+    }
+
+    // Chart.js
+    const prices = [17200, 17350, 17400, 17320, 17450, 17500, 17600];
+    const labels = ['9 AM', '10 AM', '11 AM', '12 PM', '1 PM', '2 PM', '3 PM'];
+    const ctx = document.getElementById('marketChart').getContext('2d');
+
+    new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels: labels,
+        datasets: [{
+          label: 'Nifty 50',
+          data: prices,
+          fill: false,
+          borderWidth: 2,
+          tension: 0.4,
+          pointRadius: 4,
+          pointBackgroundColor: '#fff',
+          pointBorderColor: 'currentColor',
+          segment: {
+            borderColor: ctx => {
+              const i = ctx.p0DataIndex;
+              return prices[i + 1] > prices[i] ? 'green' : 'red';
+            }
+          }
+        }]
+      },
+      options: {
+        responsive: true,
+        plugins: {
+          legend: {
+            labels: { color: 'currentColor' }
+          }
+        },
+        scales: {
+          x: { ticks: { color: 'currentColor' } },
+          y: { ticks: { color: 'currentColor' }, beginAtZero: false }
+        }
+      }
+    });
+
+    // MarketAux Fetch
+    async function fetchMarketAuxNews() {
+      const region = document.getElementById("regionSelect").value;
+      const category = document.getElementById("categorySelect").value;
+      let url = `https://api.marketaux.com/v1/news/all?api_token=${marketAuxKey}&language=en&limit=9`;
+
+      if (region) url += `&countries=${region}`;
+      if (category) url += `&categories=${category}`;
+
+      try {
+        const res = await fetch(url);
+        const data = await res.json();
+        allNews = data.data || [];
+        renderMarketAuxNews(allNews);
+      } catch (err) {
+        console.error("MarketAux error:", err);
+        newsContainer.innerHTML = `<div class="col-span-3 text-center text-red-500">Failed to load news (MarketAux).</div>`;
+      }
+    }
+
+    function renderMarketAuxNews(articles) {
+      newsContainer.innerHTML = '';
+      articles.forEach(article => {
+        const card = document.createElement('div');
+        card.className = "bg-white dark:bg-gray-800 p-4 rounded shadow hover:shadow-md transition flex flex-col";
+        const image = article.image_url 
+          ? `<img src="${article.image_url}" alt="${article.title}" class="w-full h-40 object-cover mb-3 rounded">`
+          : `<div class="w-full h-40 bg-gray-300 dark:bg-gray-700 rounded mb-3 flex items-center justify-center text-gray-500 text-sm">No image</div>`;
+        card.innerHTML = `
+          ${image}
+          <h3 class="font-bold text-lg mb-2">${article.title}</h3>
+          <p class="text-sm mb-2">${article.description || ''}</p>
+          <a href="${article.url}" target="_blank" class="text-blue-500 text-sm mt-auto">Read more</a>
+        `;
+        newsContainer.appendChild(card);
+      });
+    }
+
+    // Finnhub
+    async function fetchFinnhubNews() {
+      try {
+        const res = await fetch(`https://finnhub.io/api/v1/news?category=general&token=${finnhubApiKey}`);
+        const data = await res.json();
+        renderFinnhubNews(data.slice(0, 6));
+      } catch (err) {
+        console.error("Finnhub error:", err);
+        fin
+      }
+    }
